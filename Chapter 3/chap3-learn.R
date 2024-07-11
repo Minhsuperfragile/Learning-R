@@ -58,3 +58,10 @@ tmp.sale2 = tmp.sale2*log(store.df$p1price)/log(store.df$p2price)
 store.df$` p1sales` = floor(tmp.sale1*(1+store.df$p1prom*0.3))
 store.df$p2sales = floor(tmp.sale2*(1+store.df$p2prom*0.4))
 
+#count frequency of each price in p1
+p1.table = table(store.df$p1price)
+plot(p1.table)
+
+#cross tables of price and promotion (how often each product was promoted at each price)
+p1.crossTable = table(store.df$p1price, store.df$p1prom)
+p1.crossTable[,2] / (p1.crossTable[,1]+p1.crossTable[,2])
