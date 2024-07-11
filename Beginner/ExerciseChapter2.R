@@ -35,7 +35,7 @@ PieArea <- function(x) {
 }
 
 #what are area of pies with length 4.0, 4.5, 5.0, 6.0
-pie.radius <- c(4,4.5,5,6)
+pie.radius <- c(4, 4.5, 5, 6)
 PieArea(pie.radius)
 
 #rewrite the previous function with lambda function
