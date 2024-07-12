@@ -3,7 +3,7 @@ k.weeks = 104 # 2 years
 
 #create data frame with blank slots to hold data later
 store.df = data.frame(matrix(NA, ncol = 10, nrow = k.stores*k.weeks))
-names(store.df) = c("storeNum", " Year", "Week", " p1sales", "p2sales",
+names(store.df) = c("storeNum", "Year", "Week", "p1sales", "p2sales",
                     "p1price", "p2price", "p1prom", "p2prom", "country")
 head(store.df)
 dim(store.df) #simplest summary of store.df (see the dimension)
@@ -55,7 +55,7 @@ tmp.sale2 = tmp.sale2*log(store.df$p1price)/log(store.df$p2price)
 
 #we assume sale get a 30% or 40% boost when the product is promoted
 #and use floor() to keep sales an integer
-store.df$` p1sales` = floor(tmp.sale1*(1+store.df$p1prom*0.3))
+store.df$p1sales = floor(tmp.sale1*(1+store.df$p1prom*0.3))
 store.df$p2sales = floor(tmp.sale2*(1+store.df$p2prom*0.4))
 
 #count frequency of each price in p1
@@ -65,3 +65,26 @@ plot(p1.table)
 #cross tables of price and promotion (how often each product was promoted at each price)
 p1.crossTable = table(store.df$p1price, store.df$p1prom)
 p1.crossTable[,2] / (p1.crossTable[,1]+p1.crossTable[,2])
+
+#quantile at different level
+quantile(store.df$p1sales,probs=0:10/10)
+
+#create a summary 
+mysummary.df = data.frame(matrix(NA,nrow=2, ncol=2))
+names(mysummary.df) = c("Median sales", "IQR")
+rownames(mysummary.df) = c("Product 1" , "Product 2")
+mysummary.df["Product 1", "Median sales"] = median(store.df$p1sales)
+mysummary.df["Product 2", "Median sales"] = median(store.df$p2sales)
+mysummary.df["Product 1", "IQR"] = IQR(store.df$p1sales)
+mysummary.df["Product 2", "IQR"] = IQR(store.df$p2sales)
+mysummary.df
+
+#default summary
+summary(store.df)
+
+#describe from psych package
+install.packages("psych")
+library(psych)
+describe(store.df) #recommended to use with discrete data 
+describe(store.df[, c(2, 4:9)]) #skip some columns
+
