@@ -88,3 +88,68 @@ library(psych)
 describe(store.df) #recommended to use with discrete data 
 describe(store.df[, c(2, 4:9)]) #skip some columns
 
+#plot data
+#histogram
+hist(store.df$p1sales,
+     main="Product 1 weekly sales frequency, all stores",
+     xlab="Product 1 sales (Unit)",
+     ylab="Frequency",
+     breaks=30,
+     col="lightgreen",
+     freq=F,
+     xaxt="n")
+axis(side=1, at=seq(60,300,by=20))
+lines(density(store.df$p1sales, bw=10), 
+      type="l",
+      col="darkred",
+      lwd=2)
+
+#box plot
+boxplot(store.df$p2sales ~ store.df$p2prom,
+        main="Product 2 weekly sales by promotion",
+        xlab="Weekly sales",
+        ylab="In-store promotion?",
+        horizontal=TRUE,
+        las=1,
+        yaxt="n")
+axis(side=2,at=c(1,2), labels=c("No","Yes"))
+#bean plot (similar to box plot)
+beanplot(p2sales ~ p2prom, data=store.df,
+         what=c(1,1,1,0), log="", side="second", #side=second to compute density
+         main="Product 2 weekly sales by promotion",
+         xlab="Weekly sale",
+         ylab="In-store promotion?",
+         horizontal=TRUE,
+         las=1,
+         yaxt="n")
+#QQ plot (quantile-quantile)
+qqnorm(store.df$p1sales) #compare with normal distribution
+qqline(store.df$p1sales)
+#we observe a strange upward curve => not normally distributed
+#use log transform
+qqnorm(log(store.df$p1sales))
+qqline(log(store.df$p1sales))
+#now everything look good
+
+#cumulative distribution
+plot(ecdf(store.df$p1sales),
+     main="Cumulative distribution of p1 weekly sales",
+     ylab="Cumulative proportion",
+     xlab=c("P1 weekly sales of all store","90% of weeks sole <= 174 units"),
+     yaxt="n")
+axis(side=2, at=seq(0,1,by=0.1), las=1,
+     labels=paste(seq(0,100,by=10),"%", sep=""))
+abline(h=0.9,lty=3) # create a line at 90th percentile
+abline(v=quantile(store.df$p1sales,probs=0.9),lty=3)
+
+#by() divide data into subgroup 
+by(store.df$p1sales, list(store.df$storeNum,store.df$Year), FUN=mean)
+#use aggregate() to return a formatted result
+p1sale.sumByCountry = aggregate(store.df$p1sales, list(country=store.df$country), sum)
+
+#create map
+p1sales.map = joinCountryData2Map(p1sale.sumByCountry, joinCode="ISO2",
+                                  nameJoinColumn = "region")
+mapCountryData(mapToPlot = p1sales.map, 
+               nameColumnToPlot = "x",
+               )
