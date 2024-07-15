@@ -149,7 +149,10 @@ p1sale.sumByCountry = aggregate(store.df$p1sales, list(country=store.df$country)
 
 #create map
 p1sales.map = joinCountryData2Map(p1sale.sumByCountry, joinCode="ISO2",
-                                  nameJoinColumn = "region")
+                                  nameJoinColumn = "country")
 mapCountryData(mapToPlot = p1sales.map, 
                nameColumnToPlot = "x",
+               mapTitle="Total P1 sales by country",
+               colourPalette = brewer.pal(7,"Greens"),
+               catMethod = "fixedWidth", addLegend = F
                )
