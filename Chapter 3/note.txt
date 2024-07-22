@@ -1,0 +1,3 @@
+Chuong 3 huong dan cach mo phong du lieu co the xay ra truoc khi thuc su 
+code voi du lieu thuc te. Cung voi do la cac buoc de kiem tra du lieu
+-> du doan truoc cac van de co the xay ra voi du lieu.
