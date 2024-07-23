@@ -1,2 +1,1 @@
-Chuong 5 la ve moi quan he giua cac bien roi rac, phan tram suat hien trong 
-cac nhom du lieu.
+Chuong 5 la phan loai cac nhom du lieu va kiem tra xem giua chung co su khac biet nao khong.
