@@ -54,7 +54,7 @@ summary(m2)
 m3 = lm(logFood ~ eliteStatus + satDiningPrice, data=hotel.df)
 summary(m3)
 
-m4 = lm(avgFoodSpendPerNight ~ satDiningPrice  , data=hotel.df)
+m4 = lm(logFood ~ satDiningPrice  , data=hotel.df)
 summary(m4)
 # -> positive linear related
 
