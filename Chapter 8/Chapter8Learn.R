@@ -43,6 +43,7 @@ brand.mean.pc = prcomp(brand.mean, scale=TRUE)
 summary(brand.mean.pc)
 biplot(brand.mean.pc, main="Brand positioning", cex=c (1.5, 1))
 
+#Perform EFA
 library(nFactors)
 nScree(brand.sc[,-10])
 eigen(cor(brand.sc[,-10])) #pick number of eigenvalue > 1
