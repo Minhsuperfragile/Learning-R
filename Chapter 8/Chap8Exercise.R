@@ -1,4 +1,4 @@
-prst.df = read.csv("https://goo.gl/z5P8ce",)
+prst.df = read.csv("https://goo.gl/z5P8ce")
 write.csv(prst.df, file="prst.csv")
 
 summary(prst.df)
