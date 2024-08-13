@@ -85,3 +85,32 @@ pass.m3 = glm(Pass ~ Promo + Channel + Promo:Channel,
               data = pass.df, family = binomial)
 summary(pass.m3)
 exp(confint(pass.m3))
+
+#Hierarchical model
+conjoint.df <- read.csv(file="conj-df.csv", stringsAsFactors = TRUE)[,-1]
+conjoint.df$speed = factor(conjoint.df$speed)
+conjoint.df$height = factor(conjoint.df$height)
+str(conjoint.df)
+summary(conjoint.df)
+
+by(conjoint.df$rating, conjoint.df$height, mean)
+std.lm = lm(rating ~ speed + height + const + theme, data=conjoint.df)
+summary(std.lm)
+
+library(lme4)
+ride.hlm1 = lmer(rating ~ speed + height + const + theme + (1 | resp.id), data=conjoint.df)
+summary(ride.hlm1)
+
+fixef(ride.hlm1)
+head(ranef(ride.hlm1)$resp.id)
+head(coef(ride.hlm1)$resp.id)
+
+ride.hlm2 = lmer(rating ~ speed + height + const + theme +
+                   (speed + height + const + theme | resp.id), 
+                 data = conjoint.df, 
+                 control = lmerControl(optCtrl= list(maxfun =100000)))
+summary(ride.hlm2)
+
+fixef(ride.hlm2)
+head(ranef(ride.hlm2)$resp.id)
+head(coef(ride.hlm2)$resp.id)

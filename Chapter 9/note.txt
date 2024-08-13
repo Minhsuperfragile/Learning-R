@@ -1,0 +1,11 @@
+Handle high correlated data that effect the standard linear model
+ - Omit one of 2 correlated data
+ - Use PCA or EFA with vif metric to combine correlated variables into one
+  
+Logistic Model
+ - Binary outcome
+ - glm() use formular similar to lm() for standard linear model
+ 
+Hierarchical Model
+ - Has multi level -> overall (all respondants) and individual (each respondant). One respondant can have multiple answers (rating with different value of a thing, opinion in different times, etc).
+ 
