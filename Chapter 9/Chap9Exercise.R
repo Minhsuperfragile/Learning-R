@@ -1,9 +1,10 @@
-sales.data.raw <- read.csv("https://goo.gl/4Akgkt", stringsAsFactors = T)
+sales.data.raw <- read.csv('sale-data-raw.csv', stringsAsFactors = T)
 sales.data.raw$coupon = factor(sales.data.raw$coupon)
 sales.data.raw$purchase = factor(sales.data.raw$purchase)
 
 summary(sales.data.raw)
 
+#high correlation
 library(car)
 scatterplotMatrix(sales.data.raw[,-9])
 
@@ -37,4 +38,10 @@ sales.data.bc$sat = pc.sat$x[,1]
 linear.m3 = lm(spendMonth ~ ., data = sales.data.bc)
 summary(linear.m3)
 vif(linear.m3)
+
+#logistic regression
+
+
+log.m1 = glm(data = )
+
 
