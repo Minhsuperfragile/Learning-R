@@ -57,7 +57,7 @@ satModel <- " Quality =~ CSat + Value + q1 + q2 + q3 + 0*Cost
               Repeat =~ r1 + r2 + r3 "
 
 satSimData <- read.csv("http://goo.gl/MhghRq")
-write.csv(satSimData, file="sat-sim-data.csv")
+#write.csv(satSimData, file="sat-sim-data.csv")
 
 satDataModel <- " Quality =~ 0.59*CSat + 0.56*Value +
                             0.9*q1 + 0.9*q2 + 0.9*q3 + 0*Cost
@@ -74,7 +74,35 @@ satSimData <- data.frame( lapply(satData.norm ,
 sat.fit = sem(satModel, data = satSimData, std.lv = TRUE)
 summary(sat.fit , fit.measures= TRUE)
 
-semPaths(sat.fit , what="est", fade=FALSE , residuals=FALSE,
-         layout="tree", structural=TRUE , nCharNodes=7, edge.label.cex=1)
+#import semPlot to use this function (failed to)
+#semPaths(sat.fit , what="est", fade=FALSE , residuals=FALSE,
+#         layout="tree", structural=TRUE , nCharNodes=7, edge.label.cex=1)
 
+library(semPLS)
+set.seed(2710)
+satSimData2 <- satSimData [sample( nrow( satSimData), 50), ]
+satPLSmm <- matrix(c(
+   "Quality", "q1",
+   "Quality", "q2",
+   "Quality", "q3",
+   "Cost", "c1",
+   "Cost", "c2",
+   "Cost", "c3",
+   "Value", "v1",
+   "Value", "v2",
+   "Value", "v3",
+   "CSat", "cs1",
+   "CSat", "cs2",
+   "CSat", "cs3",
+   "Repeat", "r1",
+   "Repeat", "r2",
+   "Repeat", "r3" ), ncol=2, byrow=TRUE)
+satPLSsm <- matrix(c(
+   "Quality", "CSat",
+   "Quality", "Value",
+   "Cost", "Value",
+   "Cost", "Repeat",
+   "Value", "CSat",
+   "CSat", "Repeat" ), ncol=2, byrow=TRUE)
 
+satPLS.mod <- plsm(data =satSimData2 , strucmod= satPLSsm , measuremod=satPLSmm)
