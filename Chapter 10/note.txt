@@ -1,0 +1,10 @@
+Chapter 10 introduced structural equation model
+Which mean form an equation to construct latent variables from observed data. We can use EFA from chapter 8 to give a view to determine how many latent variables are there and also which observed variables they are manifested by.
+We should use CB-SEM whenever we can. But there are some requirements that we need about our data to be able to fit it:
+	- Enough data points (a few hundreds observation)
+	- Normally distributed residual
+	- Continous data
+	- At least 3 indicators per factor
+	- Reliablity of indicators
+
+When our data doesn't match what is required for CB-SEM, we should use PLS-SEM. It can solve most of the problems.
