@@ -1,0 +1,10 @@
+Chương 11 nói về segmentation và classification
+Segmentation có 2 phương pháp chính:
+ - Distance based: dựa vào khoảng cách giữa các data point để phân cụm
+ - Model based: dựa vào sự khác nhau giữa distribution (mean, variance) trong các cụm để phân cụm
+Classification có 2 phương pháp (được giới thiệu):
+ - Naïve Bayes: phân tích xác suất của 1 class khi có 1 yếu tố xảy ra aka P(A|B)
+ - Random forest: rất nhiều decision tree gộp lại thành 1 forest. RF còn có thể phân tích độ quan trọng của 1 biến đối với 1 class
+
+Có 1 vấn đề cần được chú ý trong classification đó là class imbalance (số lượng sample trong từng class là không cân bằng)
+--> Chỉ có thể nhận ra class với số lượng nhiều hơn mà bỏ qua class với số lượng ít
