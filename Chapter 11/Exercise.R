@@ -24,3 +24,95 @@ plot(jitter(as.numeric(seg.ex$musicEnthuse)) ~
 axis(1, at=c(1, 2), labels =c(" Subscribe: No", "Subscribe: Yes"))
 axis(2, at=c(1, 2, 3, 4,5,6,7), labels =levels(seg.ex$musicEnthuse))
 
+seg.summ(seg.ex, seg.hc.kgroup)
+
+#use k-means 
+seg.ex.num = seg.ex
+seg.ex.num$sex = ifelse(seg.ex.num$sex == "Male", 0,1)
+seg.ex.num$subscribeToMusic = ifelse(seg.ex.num$subscribeToMusic == "subNo", 0,1)
+
+set.seed(2710)
+seg.k = kmeans(seg.ex.num, centers=4)
+seg.summ(seg.ex.num, seg.k$cluster)
+
+boxplot(seg.ex.num$householdIncome ~ seg.k$cluster, ylab="Income", xlab="Cluster")
+boxplot(seg.ex.num$milesDrive ~ seg.k$cluster, ylab="Miles Drive", xlab="Cluster")
+
+clusplot(seg.ex, seg.k$cluster , color=TRUE , shade=TRUE ,
+         labels=4, lines=0, main="K-means cluster plot")
+
+#Mclust
+library(mclust)
+seg.mc = Mclust(seg.ex.num)
+summary(seg.mc)
+
+summary(Mclust(seg.ex.num, G=2))
+summary(Mclust(seg.ex.num, G=4))
+
+#poLCA
+seg.ex.cut = seg.ex
+seg.ex.cut$age = ifelse(seg.ex.cut$age < 30, 1,2)
+seg.ex.cut$kidsAtHome = ifelse(seg.ex.cut$kidsAtHome == 0, 1,2)
+seg.ex.cut$householdIncome = ifelse(seg.ex.cut$householdIncome < 55000, 1,2)
+seg.ex.cut$musicEnthuse = ifelse(seg.ex.cut$musicEnthuse < 5, 2,1)
+seg.ex.cut = seg.ex.cut[, c(-4,-7)]
+
+seg.f = with(seg.ex.cut, cbind(age, sex, householdIncome, kidsAtHome, musicEnthuse , subscribeToMusic)~1)
+library(poLCA)
+seg.lca3 = poLCA(seg.f, data=seg.ex.cut, nclass = 3)
+seg.lca4 = poLCA(seg.f, data=seg.ex.cut, nclass = 4)
+
+#naive bayes
+set.seed(2710)
+train.prop = 0.65
+train.cases = sample(nrow(seg.ex.raw), nrow(seg.ex.raw)*train.prop)
+seg.ex.train = seg.ex.raw[train.cases , ]
+seg.ex.test =  seg.ex.raw[-train.cases , ]
+
+summary(seg.ex.train)
+summary(seg.ex.test)
+
+library(e1071)
+(seg.nb <- naiveBayes(Segment ~ ., data=seg.ex.train))
+
+(seg.nb.class = predict(seg.nb, seg.ex.test))
+prop.table(table(seg.nb.class))
+clusplot(seg.ex.test[, -7], seg.nb.class , color=TRUE , shade=TRUE ,
+         labels=4, lines=0, 
+         main = "naive bayes classification, test data")
+
+mean(seg.ex.test$ Segment==seg.nb.class) # accuracy 
+adjustedRandIndex(seg.nb.class , seg.ex.test$Segment) 
+table(seg.nb.class , seg.ex.test$Segment) #confusion matrix
+
+#random forest
+library(randomForest)
+set.seed(2710)
+seg.rf = randomForest(Segment ~ ., data=seg.ex.train, ntree=3000)
+seg.rf.class = predict(seg.rf, seg.ex.test)
+clusplot(seg.ex.test[, -7], seg.rf.class , color=TRUE , shade=TRUE ,
+         labels=4, lines=0, 
+         main = "random forest classification, test data")
+
+seg.rf.class.all <- predict(seg.rf, seg.ex.test , predict.all=TRUE)
+apply(seg.rf.class.all$individual [1:5,], 1,
+      function(x) prop.table(table(x)))
+mean(seg.ex.test$Segment==seg.rf.class)
+table(seg.ex.test$ Segment , seg.rf.class)
+adjustedRandIndex(seg.ex.test$Segment , seg.rf.class)
+
+(seg.rf <- randomForest(Segment ~ ., data=seg.ex.train , ntree =3000, importance = TRUE))
+importance(seg.rf)
+varImpPlot(seg.rf, main=" Variable importance by segment")
+
+#ex15
+seg.rf = randomForest(subscribeToMusic ~ ., data=seg.ex.train, ntree=3000, sampsize=c(56,56), importance = T)
+seg.rf.class <- predict(seg.rf, seg.ex.test)
+apply(seg.rf.class.all$individual [1:5,], 1,
+      function(x) prop.table(table(x)))
+mean(seg.ex.test$subscribeToMusic==seg.rf.class)
+table(seg.ex.test$subscribeToMusic , seg.rf.class)
+adjustedRandIndex(seg.ex.test$subscribeToMusic , seg.rf.class)
+
+importance(seg.rf)
+varImpPlot(seg.rf, main=" Variable importance by segment")
