@@ -1,0 +1,4 @@
+Chương 12 là về cách tìm mối liên kết giữa các sản phẩm , hành động của khách hàng trong 1 việc mua hàng, sử dụng sản phẩm, dịch vụ
+ -> Chúng ta tìm các mối liên hệ này bằng cách thống kê số lượng "đồng xuất hiện" thông qua 3 chỉ số support, confidence (không phải confidence interval) và lift.
+    Với lift và support càng cao, có nghĩ là mối liên hệ càng mạnh, nói cách khác, khách hàng có xu hướng mua cả 2 (Hoặc nhiều) sản phẩm trong cùng 1 lần. 
+    Ta sử dụng hàm apriori trong package arules để tìm mối liên kết (hay còn gọi là rules), sử dụng package arulesViz để vẽ đồ thị các mối liên kết.
