@@ -110,7 +110,7 @@ predict.hier.mnl = function(model, data, nresp=1000) {
 }
 predict.hier.mnl(m2.hier,new.data)
 
-# bayesian model
+# Bayesian model
 choice = rep(0, nrow (cbc.df))
 choice[cbc.df[,"alt"]==1] = cbc.df[cbc.df[,"choice"]==1,"alt"]
 head(choice)
@@ -119,3 +119,53 @@ cbc.coded = model.matrix(~ seat + eng + cargo + price , data = cbc.df)
 cbc.coded = cbc.coded[, -1] #
 choicemodelr.data = cbind(cbc.df[,1:3], cbc.coded , choice)
 head(choicemodelr.data)
+
+carpool = cbc.df$carpool[cbc.df$ques==1 & cbc.df$alt==1] == "yes"
+carpool = as.numeric(carpool)
+choicemodelr.demos = as.matrix(carpool, nrow=length(carpool))
+str(choicemodelr.demos)
+
+library(ChoiceModelR)
+hb.post = choicemodelr(data = choicemodelr.data, xcoding=rep(1,7),
+                       demos=choicemodelr.demos, 
+                       mcmc = list(R=20000, use=10000),
+                       options=list(save=TRUE), directory = "G:/Code/R")
+names(hb.post)
+hb.post$compdraw[[567]]$mu
+hb.post$deltadraw[567,]
+hb.post$compdraw[[567]]$rooti
+
+crossprod(hb.post$compdraw[[567]]$rooti)
+head(hb.post $ betadraw[, ,567]) # part worth for each person
+
+str(hb.post$betadraw)
+
+beta.post.mean = apply(hb.post$betadraw, 1:2, mean )
+head(beta.post.mean)
+
+beta.post.q05 = apply(hb.post$betadraw, 1:2, quantile, probs=c(0.05))
+beta.post.q95 = apply(hb.post$betadraw, 1:2, quantile, probs=c(0.95))
+rbind(q05 = beta.post.q05[1,], mean=beta.post.mean[1,], q95=beta.post.q95[1,])
+
+predict.hb.mnl = function(betadraws, data){
+  # function to predict shares from a hierarchical multinomial logit model
+  # model: mlogit object
+  # data: a data frame containing the set of design
+  data.model = model.matrix(~ seat + eng + cargo + price, data=data)
+  data.model = data.model[,1]
+  nresp = dim(betadraws)[1]
+  ndraws = dim(hb.post$betadraw)[3]
+  shares = array(dim=c(nresp, nrow(data), ndraws))
+  for (d in 1:ndraws){
+    for (i in 1:nresp){
+      utility = data.model %*% betadraws[1,,d]
+      shares[1,,d] = exp(utility) / sum(exp(utility))
+    }
+  }
+  shares.agg = apply(shares, 2:3, mean)
+  cbind(share=apply(shares.agg, 1, mean),
+        pct = t(apply(shares.agg, 1, quantile, probs=c(0.05, 0.95))),
+        data)
+
+}
+predict.hb.mnl(hb.post$betadraw, new.data)

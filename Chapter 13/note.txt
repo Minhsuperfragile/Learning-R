@@ -1,0 +1,5 @@
+  Chương 12 nói về cách 1 tính năng của sản phẩm ảnh hưởng đến lựa chọn của người dùng
+  Thông qua survey về các tính năng của sản phẩm mà người dùng sẽ lựa chọn 
+  Sử dụng package mlogit để xác định lựa chọn mà người dùng muốn, từ đó đưa ra thiết kế phù hợp
+  Ngoài ra còn có hierarchical model có thể đưa ra những thống kê cụ thể hơn với từng cá nhân
+  
