@@ -1,6 +1,133 @@
 epa.df = readRDS("rintro-chapter14-epa.rds")
 summary(epa.df)
 
-plot(epa.df$bytes)
-plot(log(epa.df$bytes))
-plot(table(log(epa.df$bytes)))
+bytes.host = aggregate(bytes ~ host , data=epa.df, sum)
+bytes.host = bytes.host[rev(order(bytes.host$bytes)), ]
+
+hist(bytes.host$bytes)
+hist(log(bytes.host$bytes[bytes.host$bytes > 0]), main = "Histogram of log bytes")
+#plot(log(bytes.host$bytes))
+
+bytes.tab = table(bytes.host$bytes)
+bytes.tab[which.max(bytes.tab)]
+bytes.host[bytes.host$bytes == 11747,]
+bytes.most.host = bytes.host[bytes.host$bytes == 11747, "host"]
+View(epa.df[epa.df$host %in% bytes.most.host, ])
+
+epa.ordered = epa.df[order(epa.df$host, epa.df$datetime), ]
+
+epa.ordered$time.diff = 
+  c(NA, 
+    as.numeric(
+      epa.ordered$datetime[2:nrow(epa.ordered)] - 
+        epa.ordered$datetime[1:(nrow(epa.ordered)-1)], 
+      units="mins")
+  )
+
+session.time              = 15   
+epa.ordered$newsession    = NA   
+epa.ordered$newsession[1] = TRUE 
+
+epa.ordered$newsession[2:nrow(epa.ordered)]  <- 
+  ifelse(epa.ordered$host[2:nrow(epa.ordered)] != 
+           epa.ordered$host[1:(nrow(epa.ordered)-1)],   
+         TRUE,                                          
+         epa.ordered$time.diff[2:nrow(epa.ordered)] >= 
+           session.time )   
+
+epa.ordered$session <- cumsum(epa.ordered$newsession)
+epa.ordered$time.diff[epa.ordered$newsession] <- NA  
+
+top.pages <- names(head(sort(table(epa.df$page[epa.df$pagetype=="html"]), 
+                             decreasing = TRUE), 20))
+
+epa.html    <- subset(epa.ordered, pagetype=="html" & page %in% top.pages)
+
+# split the sessions
+epa.session <- split(epa.html, epa.html$session)
+epa.stream.len <- lapply(epa.session, nrow)
+epa.session <- epa.session[epa.stream.len > 1]
+
+epa.stream <- unlist(lapply(epa.session, 
+                             function(x) 
+                               paste0(unique(x$host), ",", 
+                                      paste0(unlist(x$page), collapse=","))))
+head(epa.stream)
+epa.stream <- gsub("/", "ii", epa.stream)
+epa.stream <- gsub(".html", "", epa.stream, fixed=TRUE)
+head(epa.stream)
+
+library(clickstream)
+click.tempfile <- tempfile()
+writeLines(epa.stream, click.tempfile)
+epa.trans <- readClickstreams(click.tempfile, header = TRUE)
+
+epa.mc <- fitMarkovChain(epa.trans, order=1)
+epa.mc@transitions
+
+#visualize 
+epa.mc.mat <- t(epa.mc@transitions[[1]])
+dimnames(epa.mc.mat)[[1]] <- gsub("ii", "/", dimnames(epa.mc.mat)[[1]])
+dimnames(epa.mc.mat)[[2]] <- gsub("ii", "/", dimnames(epa.mc.mat)[[2]])
+library(superheat)
+set.seed(70510)
+superheat(epa.mc.mat,
+          bottom.label.size = 0.8,
+          bottom.label.text.size = 3.5,
+          bottom.label.text.angle = 270,
+          left.label.size = 0.4,
+          left.label.text.size = 4,
+          heat.col.scheme = "red", 
+          n.clusters.rows = 5, n.clusters.cols = 5,
+          left.label = "variable", bottom.label = "variable", 
+          title="Transitions, in sequences of top 20 pages (Row-to-Col)")
+
+set.seed(59911)
+plot(epa.mc, minProbability=0.15) # graph
+
+#fit model with 40 html
+top.pages40 <- names(head(sort(table(epa.df$page[epa.df$pagetype=="html"]), 
+                               decreasing = TRUE), 40))
+
+epa.html40    <- subset(epa.ordered, pagetype=="html" & page %in% top.pages40)
+
+# accumulate the sessions
+epa.session40 <- split(epa.html40, epa.html40$session)
+# remove any length of 1
+epa.stream.len <- lapply(epa.session40, nrow)
+epa.session40 <- epa.session40[epa.stream.len > 1]
+
+str(head(epa.session40))
+length(epa.session40)
+
+epa.stream40 <- unlist(lapply(epa.session40, 
+                             function(x) 
+                               paste0(unique(x$host), ",", 
+                                      paste0(unlist(x$page), collapse=","))))
+
+click.tempfile <- tempfile()
+writeLines(epa.stream40, click.tempfile)
+epa.trans40 <- readClickstreams(click.tempfile, header = TRUE)
+
+epa.mc40 <- fitMarkovChain(epa.trans40, order=1)
+epa.mc40@transitions
+
+#visualize 
+epa.mc.mat40 <- t(epa.mc40@transitions[[1]])
+dimnames(epa.mc.mat40)[[1]] <- gsub("ii", "/", dimnames(epa.mc.mat40)[[1]])
+dimnames(epa.mc.mat40)[[2]] <- gsub("ii", "/", dimnames(epa.mc.mat40)[[2]])
+library(superheat)
+set.seed(70510)
+superheat(epa.mc.mat40,
+          bottom.label.size = 0.8,
+          bottom.label.text.size = 3.5,
+          bottom.label.text.angle = 270,
+          left.label.size = 0.4,
+          left.label.text.size = 4,
+          heat.col.scheme = "red", 
+          n.clusters.rows = 5, n.clusters.cols = 5,
+          left.label = "variable", bottom.label = "variable", 
+          title="Transitions, in sequences of top 20 pages (Row-to-Col)")
+
+set.seed(59911)
+plot(epa.mc40, minProbability=0.15) # graph
