@@ -1,0 +1,5 @@
+Chương 14 chủ yếu nói về quá trình xử lý  data dạng chuỗi các hành động .
+- Ngày tháng cần được định dạng cụ thể 
+- Regex để xử lý string 
+- Data dạng log cần được chuyển về từng session 
+Markov Chain là model dùng để xử lý các bước di chuyển trong  từng hành động của người dùng.
